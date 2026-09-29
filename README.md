@@ -2,6 +2,8 @@
 
 macOS 原生 ROM 封面刮削器。扫描 ROM 文件夹或掌机存储卡，从 Libretro 和 SteamGridDB 查找封面，按目标固件的目录规则写入 PNG 图片。
 
+![ROMCover 0.2.0 主界面，已选择 NextUI 目录预设](Assets/Screenshots/ROMCover-NextUI.png)
+
 ## 下载
 
 从 [Releases](https://github.com/Drafffffff/ROMCover/releases/latest) 下载最新的 `ROMCover-<版本>-macOS-universal.zip`，解压后将 `ROMCover.app` 放进“应用程序”文件夹。支持 macOS 14 及以上的 Apple Silicon 与 Intel Mac。
