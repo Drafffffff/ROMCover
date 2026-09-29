@@ -4,9 +4,9 @@ macOS 原生 ROM 封面刮削器。扫描 ROM 文件夹或掌机存储卡，从 
 
 ## 下载
 
-从 [Releases](https://github.com/Drafffffff/ROMCover/releases/latest) 下载 `ROMCover-0.1.0-macOS-universal.zip`，解压后将 `ROMCover.app` 放进“应用程序”文件夹。支持 macOS 14 及以上的 Apple Silicon 与 Intel Mac。
+从 [Releases](https://github.com/Drafffffff/ROMCover/releases/latest) 下载最新的 `ROMCover-<版本>-macOS-universal.zip`，解压后将 `ROMCover.app` 放进“应用程序”文件夹。支持 macOS 14 及以上的 Apple Silicon 与 Intel Mac。
 
-首版使用临时签名，尚未经过 Apple 公证。首次打开如被 macOS 拦截，先尝试打开一次，然后前往“系统设置”→“隐私与安全性”选择“仍要打开”。参见 [Apple 的操作说明](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac)。
+当前发布版使用临时签名，尚未经过 Apple 公证。首次打开如被 macOS 拦截，先尝试打开一次，然后前往“系统设置”→“隐私与安全性”选择“仍要打开”。参见 [Apple 的操作说明](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac)。
 
 ## 使用
 
@@ -33,9 +33,10 @@ macOS 原生 ROM 封面刮削器。扫描 ROM 文件夹或掌机存储卡，从 
 
 游戏代码只对应一张标准标题与地区相符的封面时，应用会预选；有多个地区、修订版或其他歧义时保持“待确认”，并优先排列对应地区的正式发行封面。
 
-## 首版预设
+## 固件预设
 
 - 安伯尼克原厂 Linux（已按 RG DS Plus 原厂卡核对）：`ROMS/<系统>/Imgs/<ROM 文件名>.png`。现有 JPG/PNG 均识别并跳过；手动替换时沿用原文件格式。只有原本存在 `gamelist.xml` 时才合并，不会在 RG DS Plus 卡上新建它。
+- NextUI：按[官方封面规则](https://nextui.loveretro.games/customizing/game-artwork/)写入 ROM 所在目录的 `.media/<ROM 文件名去扩展名>.png`；ZIP 与多光盘列表也使用主文件名。支持 `(GB)`、`(GBA)`、`(MGBA)` 等目录标签和同平台多个物理文件夹；不创建 `gamelist.xml`。发现卡根目录的 NextUI `.pakz` 文件时自动选择此预设。
 - GarlicOS / OnionOS：`Roms/<系统>/Imgs/<ROM 文件名>.png`。
 - muOS：读取 `MUOS/info/assign/<系统>/global.ini` 的 `catalogue` 值，输出到 `MUOS/info/catalogue/<catalogue>/box/`。
 - KNULLI / Batocera / ArkOS：输出到系统目录的 `images/` 并合并 `gamelist.xml`。

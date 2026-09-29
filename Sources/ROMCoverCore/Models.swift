@@ -104,6 +104,7 @@ public enum GameSystem: String, CaseIterable, Codable, Identifiable, Sendable {
 
 public enum ExportProfile: String, CaseIterable, Identifiable, Sendable {
     case anbernicStock = "安伯尼克原厂 Linux"
+    case nextUI = "NextUI"
     case garlic = "GarlicOS"
     case muos = "muOS"
     case emulationStation = "KNULLI / Batocera / ArkOS"
@@ -112,6 +113,20 @@ public enum ExportProfile: String, CaseIterable, Identifiable, Sendable {
 
     public var id: String { rawValue }
     public var requiresGamelist: Bool { self == .emulationStation }
+
+    public static func suggest(for url: URL) -> ExportProfile? {
+        let fm = FileManager.default
+        let roots = [url, url.deletingLastPathComponent(), url.deletingLastPathComponent().deletingLastPathComponent()]
+        if roots.contains(where: {
+            fm.fileExists(atPath: $0.appendingPathComponent("nextui.pak_store.pakz").path) ||
+            fm.fileExists(atPath: $0.appendingPathComponent("nextui.updater.pakz").path)
+        }) { return .nextUI }
+        if roots.contains(where: { fm.fileExists(atPath: $0.appendingPathComponent("MUOS/info/assign").path) }) { return .muos }
+        if roots.contains(where: { fm.fileExists(atPath: $0.appendingPathComponent("miyoo").path) }) { return .onion }
+        if roots.contains(where: { fm.fileExists(atPath: $0.appendingPathComponent("CFW/config/coremapping.json").path) }) { return .garlic }
+        if roots.contains(where: { fm.fileExists(atPath: $0.appendingPathComponent("batocera").path) }) { return .emulationStation }
+        return nil
+    }
 }
 
 public enum ArtworkSource: String, CaseIterable, Identifiable, Sendable {

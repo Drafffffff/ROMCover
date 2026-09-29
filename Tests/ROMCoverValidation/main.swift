@@ -89,6 +89,52 @@ do {
     }
 
     try fixture { root in
+        let gbaFolder = root.appendingPathComponent("Roms/Game Boy Advance (GBA)")
+        let alternateFolder = root.appendingPathComponent("Roms/Game Boy Advance (MGBA)")
+        let gbFolder = root.appendingPathComponent("Roms/Game Boy (GB)")
+        let nestedFolder = root.appendingPathComponent("Roms/Sony PlayStation (PS)/Translations")
+        for folder in [gbaFolder, alternateFolder, gbFolder, nestedFolder] {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        }
+        try Data().write(to: root.appendingPathComponent("nextui.pak_store.pakz"))
+        let gba = gbaFolder.appendingPathComponent("Metroid Fusion (USA).gba")
+        let alternate = alternateFolder.appendingPathComponent("Metroid Fusion (USA).zip")
+        let gb = gbFolder.appendingPathComponent("Tetris (World).zip")
+        let ps = nestedFolder.appendingPathComponent("Chrono Cross.m3u")
+        for file in [gba, alternate, gb, ps] { try Data([0]).write(to: file) }
+        try FileManager.default.createDirectory(at: gbFolder.appendingPathComponent(".media"), withIntermediateDirectories: true)
+        try Data([0]).write(to: gbFolder.appendingPathComponent(".media/Not a ROM.zip"))
+
+        try expect(ExportProfile.suggest(for: root) == .nextUI, "NextUI 存储卡未自动识别")
+        try expect(ExportProfile.suggest(for: gbaFolder) == .nextUI, "选择 NextUI 单个系统目录时未自动识别")
+        let games = try ROMScanner().scan(root: root)
+        try expect(games.count == 4, "NextUI 的 .media 被当作 ROM 扫描")
+        try expect(SystemDetector.detect(gba, root: root).0 == .gba, "NextUI GBA 目录标签识别失败")
+        try expect(SystemDetector.detect(alternate, root: root).0 == .gba, "NextUI MGBA 目录标签识别失败")
+        try expect(SystemDetector.detect(gb, root: root).0 == .gb, "NextUI ZIP 平台识别失败")
+        try expect(SystemDetector.detect(gb, root: gbFolder).0 == .gb, "选择 NextUI 单个系统目录时 ZIP 平台识别失败")
+        try expect(SystemDetector.detect(ps, root: root).0 == .ps1, "NextUI 嵌套 PS 目录标签识别失败")
+
+        let planner = ExportPlanner()
+        let gbaGame = ROMGame(fileURL: gba, rootURL: root, system: .gba)
+        let alternateGame = ROMGame(fileURL: alternate, rootURL: root, system: .gba)
+        let gbGame = ROMGame(fileURL: gb, rootURL: root, system: .gb)
+        let psGame = ROMGame(fileURL: ps, rootURL: root, system: .ps1)
+        let gbaLocation = try planner.location(for: gbaGame, profile: .nextUI)
+        try expect(gbaLocation.imageURL == gbaFolder.appendingPathComponent(".media/Metroid Fusion (USA).png"), "NextUI 封面路径不正确")
+        try expect(gbaLocation.gamelistURL == nil, "NextUI 不应使用 gamelist.xml")
+        try expect(try planner.location(for: alternateGame, profile: .nextUI).imageURL == alternateFolder.appendingPathComponent(".media/Metroid Fusion (USA).png"), "NextUI 合并平台目录的封面混用")
+        try expect(try planner.location(for: gbGame, profile: .nextUI).imageURL == gbFolder.appendingPathComponent(".media/Tetris (World).png"), "NextUI ZIP 封面名称不正确")
+        try expect(try planner.location(for: psGame, profile: .nextUI).imageURL == nestedFolder.appendingPathComponent(".media/Chrono Cross.png"), "NextUI 子目录封面路径不正确")
+
+        let writer = ExportWriter()
+        try expect(try writer.write(imageData: png, game: gbaGame, profile: .nextUI, replace: false) == .written, "NextUI 封面写入失败")
+        try expect(try writer.write(imageData: png, game: gbaGame, profile: .nextUI, replace: false) == .skippedExisting, "NextUI 重复写入未跳过")
+        try expect(try Data(contentsOf: gbaLocation.imageURL).starts(with: [0x89, 0x50, 0x4e, 0x47]), "NextUI 输出不是 PNG")
+        try expect(!FileManager.default.fileExists(atPath: gbaFolder.appendingPathComponent("gamelist.xml").path), "NextUI 意外创建了 gamelist.xml")
+    }
+
+    try fixture { root in
         let system = root.appendingPathComponent("Roms/GBA")
         try FileManager.default.createDirectory(at: system, withIntermediateDirectories: true)
         let file = system.appendingPathComponent("Metroid.gba")

@@ -10,6 +10,10 @@ public struct ExportPlanner {
         let systemFolder = systemRoot(for: game)
         let stem = game.stem
         switch profile {
+        case .nextUI:
+            let folder = ROMPath.canonical(game.fileURL).deletingLastPathComponent().appendingPathComponent(".media")
+            return ExportLocation(imageURL: folder.appendingPathComponent("\(stem).png"),
+                gamelistURL: nil, romPathInGamelist: nil)
         case .garlic, .onion:
             return ExportLocation(imageURL: imagePath(in: systemFolder.appendingPathComponent("Imgs"), stem: stem), gamelistURL: nil, romPathInGamelist: nil)
         case .anbernicStock:
@@ -226,7 +230,7 @@ private extension ExportProfile {
     var maxPixel: Int {
         switch self {
         case .garlic, .onion, .retroArch, .anbernicStock: 512
-        case .muos, .emulationStation: 800
+        case .muos, .emulationStation, .nextUI: 800
         }
     }
 }

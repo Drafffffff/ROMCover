@@ -132,7 +132,7 @@ final class LibraryModel: ObservableObject {
         rootURL = url
         rows = []
         selectedID = nil
-        profile = suggestProfile(at: url) ?? .anbernicStock
+        profile = ExportProfile.suggest(for: url) ?? .anbernicStock
         isBusy = true
         message = "正在扫描…"
         activeTask = Task {
@@ -344,16 +344,6 @@ final class LibraryModel: ObservableObject {
             message = "读取 DeepSeek API Key 失败（\(status)）。"
         }
     }
-
-    private func suggestProfile(at url: URL) -> ExportProfile? {
-        let fm = FileManager.default
-        let root = [url, url.deletingLastPathComponent()]
-        if root.contains(where: { fm.fileExists(atPath: $0.appendingPathComponent("MUOS/info/assign").path) }) { return .muos }
-        if root.contains(where: { fm.fileExists(atPath: $0.appendingPathComponent("miyoo").path) }) { return .onion }
-        if root.contains(where: { fm.fileExists(atPath: $0.appendingPathComponent("CFW/config/coremapping.json").path) }) { return .garlic }
-        if root.contains(where: { fm.fileExists(atPath: $0.appendingPathComponent("batocera").path) }) { return .emulationStation }
-        return nil
-    }
 }
 
 struct ContentView: View {
@@ -474,7 +464,7 @@ struct ContentView: View {
                             ForEach(ExportProfile.allCases) { Text($0.rawValue).tag($0) }
                         }
                         .labelsHidden()
-                        Text("原厂 Linux 已按 RG DS Plus 卡核对 Imgs 路径；其他型号仍请核对右侧预览。")
+                        Text("原厂 Linux 已按 RG DS Plus 卡核对；NextUI 封面写入 ROM 旁的 .media。请核对右侧路径。")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     VStack(alignment: .leading, spacing: 12) {

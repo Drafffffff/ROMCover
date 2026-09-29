@@ -85,9 +85,11 @@ public enum SystemDetector {
         let relative = ROMPath.relative(url, to: root) ?? url.lastPathComponent
         let folders = relative.split(separator: "/").dropLast().map(String.init)
         for folder in folders.reversed() {
+            if let system = taggedSystem(in: folder) { return (system, "按 ROM 目录标签识别") }
             let key = folder.lowercased().filter { $0.isLetter || $0.isNumber }
             if let system = aliases.first(where: { $0.value.contains(key) })?.key { return (system, "按 ROM 目录识别") }
         }
+        if let system = taggedSystem(in: root.lastPathComponent) { return (system, "按所选目录标签识别") }
         let ext = url.pathExtension.lowercased()
         if let system = extensions[ext] { return (system, "按文件格式识别") }
         if ext == "zip", let entry = firstArchiveEntry(url) {
@@ -96,6 +98,15 @@ public enum SystemDetector {
         }
         if let system = headerSystem(url) { return (system, "按文件头识别") }
         return (nil, "格式可识别，但平台需要手动指定")
+    }
+
+    private static func taggedSystem(in folder: String) -> GameSystem? {
+        let name = folder.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let range = name.range(of: #"\([A-Za-z0-9]+\)$"#, options: .regularExpression) else { return nil }
+        let tag = String(name[range].dropFirst().dropLast()).lowercased()
+        if tag == "mgba" { return .gba }
+        if tag == "fbn" { return .fbneo }
+        return aliases.first { $0.value.contains(tag) }?.key
     }
 
     private static func headerSystem(_ url: URL) -> GameSystem? {
